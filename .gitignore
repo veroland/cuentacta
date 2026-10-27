@@ -1,0 +1,6 @@
+# Local reference material; do not publish third-party images or rule files.
+/ejemplos/
+/referencias/
+
+# Local orchestration state.
+/.atl/
