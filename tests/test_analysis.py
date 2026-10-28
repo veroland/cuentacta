@@ -5,7 +5,7 @@ import numpy as np
 import cuentacta.analysis as analysis
 
 from cuentacta.analysis import TactaAnalyzer, _enhance_luminance, find_visible_points
-from cuentacta.cli import _apply_answers, _has_answers_for_questions, _read_answers, _review_questions, _write_review_crops
+from cuentacta.cli import _apply_answers, _has_answers_for_questions, _read_answers, _review_questions, _score_points, _write_review_crops
 
 
 def test_finds_a_visible_blue_point() -> None:
@@ -160,6 +160,10 @@ def test_reads_answers_written_with_a_utf8_bom(tmp_path) -> None:
     answers_path.write_text('{"partida1-question-01-blue-or-purple.jpg": "purple"}', encoding="utf-8-sig")
 
     assert _read_answers(answers_path) == {"partida1-question-01-blue-or-purple.jpg": "purple"}
+
+
+def test_assisted_scores_include_selected_colors_without_points() -> None:
+    assert _score_points([_point("blue", (10, 10))], ["blue", "orange"]) == {"blue": 1, "orange": 0}
 
 
 def test_review_answers_reclassify_or_reject_a_point() -> None:

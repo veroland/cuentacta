@@ -38,7 +38,7 @@ def main() -> None:
                 "scores": result.scores,
                 "reason": result.reason,
                 "detections": [detection.__dict__ for detection in result.detections],
-                "assisted_scores": _score_points(reviewed) if review_complete else None,
+                "assisted_scores": _score_points(reviewed, args.colors) if review_complete else None,
             },
             indent=2,
         )
@@ -160,8 +160,8 @@ def _question_name(image_stem: str, index: int, detection) -> str:
     )
 
 
-def _score_points(detections) -> dict[str, int]:
-    scores: dict[str, int] = {}
+def _score_points(detections, selected_colors=None) -> dict[str, int]:
+    scores: dict[str, int] = {color: 0 for color in selected_colors or ()}
     for detection in detections:
         scores[detection.color] = scores.get(detection.color, 0) + 1
     return scores
