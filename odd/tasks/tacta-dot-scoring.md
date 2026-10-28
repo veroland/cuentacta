@@ -14,8 +14,8 @@ S2. "claro si revisa lo que esté mal, las reglas están en el manual"
    - The user-selected player colors remain known at game setup; uncertain dot ownership remains reviewable and may be rejected when it is not a point.
 
 ## Tasks
-- T1 | S1-S2 | inline — audit and correct rule/documentation contract | done | docs corrected; manual verified
-- T2 | S1-S2 | inline — replace value-icon counting with visible-dot detection and regression tests | partial | 14 tests pass; official example still over-detects 39 candidates versus 32 expected
+- T1 | S1-S2 | inline — audit and correct rule/documentation contract | done | 854f2d2
+- T2 | S1-S2 | inline — replace value-icon counting with visible-dot detection and regression tests | partial | 854f2d2; 15 tests pass; six candidates remain unassigned
 
 ## Log
 L1. recuerda que cuentas todos los puntos. Revisa nuevamente todo porque estas contando mal
