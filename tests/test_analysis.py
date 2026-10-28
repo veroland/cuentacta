@@ -66,6 +66,18 @@ def test_finds_a_dot_with_a_small_shadow_hole() -> None:
     assert points[0].color == "pink"
 
 
+def test_finds_a_dot_with_a_medium_shadow_hole() -> None:
+    image = np.zeros((2_000, 2_000, 3), dtype=np.uint8)
+    cv2.circle(image, (1_000, 1_000), 40, _bgr_from_hsv(105, 255, 255), thickness=-1)
+    cv2.circle(image, (1_000, 1_000), 18, (230, 230, 230), thickness=-1)
+    cv2.circle(image, (1_000, 1_000), 7, (80, 80, 80), thickness=-1)
+
+    points = find_visible_points(image)
+
+    assert len(points) == 1
+    assert points[0].color == "blue"
+
+
 def test_finds_a_light_gray_dot_in_a_light_blue_region() -> None:
     image = np.zeros((1_000, 1_000, 3), dtype=np.uint8)
     image[:] = _bgr_from_hsv(105, 70, 190)

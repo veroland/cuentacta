@@ -210,7 +210,7 @@ def _has_large_hole(
         for contour, (_, _, _, parent) in zip(contours, hierarchy[0])
         if parent >= 0
     )
-    return outer_area > 0 and hole_area / outer_area > 0.15
+    return outer_area > 0 and hole_area / outer_area > 0.25
 
 
 def _surrounding_color(
