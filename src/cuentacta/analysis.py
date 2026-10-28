@@ -129,6 +129,8 @@ def _find_points_in_mask(mask: np.ndarray, hsv: np.ndarray) -> list[PointDetecti
         color, color_confidence, alternatives = _surrounding_color(
             hsv, center, max(width, height)
         )
+        if color is None:
+            continue
         confidence = min(1.0, circularity * color_confidence)
         points.append(
             PointDetection(
@@ -207,7 +209,7 @@ def _surrounding_color(
     radius = max(1, diameter // 2)
     y_coordinates, x_coordinates = np.ogrid[: hsv.shape[0], : hsv.shape[1]]
     distance = np.hypot(x_coordinates - x, y_coordinates - y)
-    ring = (distance > radius * 0.7) & (distance < radius * 1.5)
+    ring = (distance > radius) & (distance < radius * 1.3)
     pixels = hsv[ring & (hsv[:, :, 1] > 100) & (hsv[:, :, 2] > 60)]
     if len(pixels) < 20:
         return None, 0.0, ("blue", "purple")

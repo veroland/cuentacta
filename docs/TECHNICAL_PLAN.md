@@ -63,6 +63,8 @@ or a retake response:
 
 Current baseline: the local Python harness must detect every visible white point dot and assign it to its surrounding card color. It returns `retake_required` until every detected point dot has a confident color assignment, and it must be calibrated against the recorded board totals. Card-value icons are not score items.
 
+A scoring candidate must be a solid white circle fully inside the owning card-color region. Card-value badges, color-accessibility symbols, borders, and card intersections must be rejected even when they contain white pixels.
+
 ### Phase 3 — Android proof of concept
 
 - Create the temporary game setup flow.

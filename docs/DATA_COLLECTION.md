@@ -35,4 +35,5 @@ This guide creates a reliable TACTA card reference set before model work begins.
 - [ ] No card overlaps another card.
 - [ ] Every visible point dot and its card color are sharp enough to read when zoomed.
 - [ ] No glare covers a visible point dot.
+- [ ] Labels exclude value badges, color-accessibility symbols, card borders, and card intersections.
 - [ ] The image is taken from near directly above.

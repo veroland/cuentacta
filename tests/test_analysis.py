@@ -91,7 +91,7 @@ def test_analyzer_returns_retake_for_a_low_confidence_point(monkeypatch) -> None
     assert result.scores is None
 
 
-def test_keeps_a_dot_without_a_color_for_review(monkeypatch) -> None:
+def test_rejects_a_dot_without_a_surrounding_card_color(monkeypatch) -> None:
     image = np.zeros((1_000, 1_000, 3), dtype=np.uint8)
     cv2.circle(image, (500, 500), 22, _bgr_from_hsv(105, 255, 255), thickness=-1)
     cv2.circle(image, (500, 500), 8, (230, 230, 230), thickness=-1)
@@ -103,9 +103,7 @@ def test_keeps_a_dot_without_a_color_for_review(monkeypatch) -> None:
 
     points = analysis.find_visible_points(image)
 
-    assert len(points) == 1
-    assert points[0].color is None
-    assert points[0].confidence == 0
+    assert points == []
 
 
 def test_writes_named_review_crop_for_an_uncertain_point(tmp_path) -> None:

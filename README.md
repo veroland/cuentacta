@@ -22,6 +22,8 @@ Third-party visual references and game materials are intentionally excluded from
 
 The local harness recognizes visible white point dots and refuses to guess
 when their card color is uncertain.
+Only solid white circles fully inside a card-color region count; value badges,
+color-accessibility symbols, borders, and card intersections do not.
 
 ```powershell
 python -m venv .venv
