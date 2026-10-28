@@ -113,7 +113,7 @@ def _find_points_in_mask(mask: np.ndarray, hsv: np.ndarray) -> list[PointDetecti
     points: list[PointDetection] = []
     for label, (x, y, width, height, area) in enumerate(statistics[1:], start=1):
         if not (
-            15 <= area <= 500
+            15 <= area <= 2_000
             and minimum_side <= width <= maximum_side
             and minimum_side <= height <= maximum_side
         ):

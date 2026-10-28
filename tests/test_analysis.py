@@ -19,6 +19,17 @@ def test_finds_a_visible_blue_point() -> None:
     assert points[0].color == "blue"
 
 
+def test_finds_a_larger_visible_blue_point() -> None:
+    image = np.zeros((2_000, 2_000, 3), dtype=np.uint8)
+    cv2.circle(image, (1_000, 1_000), 40, _bgr_from_hsv(105, 255, 255), thickness=-1)
+    cv2.circle(image, (1_000, 1_000), 18, (230, 230, 230), thickness=-1)
+
+    points = find_visible_points(image)
+
+    assert len(points) == 1
+    assert points[0].color == "blue"
+
+
 def test_ignores_non_circular_light_marks() -> None:
     image = np.zeros((300, 300, 3), dtype=np.uint8)
     cv2.rectangle(image, (110, 110), (190, 190), _bgr_from_hsv(105, 255, 255), thickness=-1)
