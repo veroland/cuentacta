@@ -54,6 +54,37 @@ def test_ignores_a_number_inside_a_circular_value_badge() -> None:
     assert find_visible_points(image) == []
 
 
+def test_finds_a_dot_with_a_small_shadow_hole() -> None:
+    image = np.zeros((1_000, 1_000, 3), dtype=np.uint8)
+    cv2.circle(image, (500, 500), 22, _bgr_from_hsv(165, 255, 255), thickness=-1)
+    cv2.circle(image, (500, 500), 8, (230, 230, 230), thickness=-1)
+    cv2.circle(image, (500, 500), 1, (80, 80, 80), thickness=-1)
+
+    points = find_visible_points(image)
+
+    assert len(points) == 1
+    assert points[0].color == "pink"
+
+
+def test_finds_a_light_gray_dot_in_a_light_blue_region() -> None:
+    image = np.zeros((1_000, 1_000, 3), dtype=np.uint8)
+    image[:] = _bgr_from_hsv(105, 70, 190)
+    cv2.circle(image, (500, 500), 8, (230, 230, 230), thickness=-1)
+
+    points = find_visible_points(image)
+
+    assert len(points) == 1
+    assert points[0].color == "blue"
+
+
+def test_rejects_a_light_symbol_with_only_sparse_card_color_nearby() -> None:
+    image = np.zeros((1_000, 1_000, 3), dtype=np.uint8)
+    cv2.circle(image, (500, 500), 8, (230, 230, 230), thickness=-1)
+    cv2.rectangle(image, (502, 480), (520, 492), _bgr_from_hsv(165, 255, 255), thickness=-1)
+
+    assert find_visible_points(image) == []
+
+
 def test_enhances_local_luminance_without_changing_dimensions() -> None:
     image = np.full((64, 64, 3), 40, dtype=np.uint8)
     image[24:40, 24:40] = 70

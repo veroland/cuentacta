@@ -99,9 +99,11 @@ def find_visible_points(image: np.ndarray) -> list[PointDetection]:
     low_saturation = cv2.inRange(hsv, (0, 0, 0), (179, 110, 255))
     enhanced_dots = cv2.bitwise_and(bright_pixels, low_saturation)
     original_dots = cv2.inRange(hsv, (0, 0, 150), (179, 110, 255))
+    local_dots = _local_contrast_mask(image)
 
     points = _find_points_in_mask(original_dots, hsv)
     points.extend(_find_points_in_mask(enhanced_dots, hsv))
+    points.extend(_find_points_in_mask(local_dots, hsv))
     return _deduplicate_points(points)
 
 
@@ -123,7 +125,7 @@ def _find_points_in_mask(mask: np.ndarray, hsv: np.ndarray) -> list[PointDetecti
         circularity = _circularity(labels, label, x, y, width, height)
         if circularity < 0.75:
             continue
-        if _component_has_hole(labels, label, x, y, width, height):
+        if _has_large_hole(labels, label, x, y, width, height):
             continue
         center = tuple(int(round(value)) for value in centers[label])
         color, color_confidence, alternatives = _surrounding_color(
@@ -187,7 +189,7 @@ def _circularity(
     return float(4 * np.pi * cv2.contourArea(contour) / (perimeter * perimeter))
 
 
-def _component_has_hole(
+def _has_large_hole(
     labels: np.ndarray,
     label: int,
     x: int,
@@ -196,8 +198,19 @@ def _component_has_hole(
     height: int,
 ) -> bool:
     component = np.uint8(labels[y : y + height, x : x + width] == label) * 255
-    _, hierarchy = cv2.findContours(component, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-    return hierarchy is not None and any(parent >= 0 for _, _, _, parent in hierarchy[0])
+    contours, hierarchy = cv2.findContours(component, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    if hierarchy is None:
+        return False
+    outer_area = max(
+        (cv2.contourArea(contour) for contour, (_, _, _, parent) in zip(contours, hierarchy[0]) if parent < 0),
+        default=0.0,
+    )
+    hole_area = sum(
+        cv2.contourArea(contour)
+        for contour, (_, _, _, parent) in zip(contours, hierarchy[0])
+        if parent >= 0
+    )
+    return outer_area > 0 and hole_area / outer_area > 0.15
 
 
 def _surrounding_color(
@@ -210,9 +223,11 @@ def _surrounding_color(
     y_coordinates, x_coordinates = np.ogrid[: hsv.shape[0], : hsv.shape[1]]
     distance = np.hypot(x_coordinates - x, y_coordinates - y)
     ring = (distance > radius) & (distance < radius * 1.3)
-    pixels = hsv[ring & (hsv[:, :, 1] > 100) & (hsv[:, :, 2] > 60)]
-    if len(pixels) < 20:
+    colored_ring = ring & (hsv[:, :, 1] > 40) & (hsv[:, :, 2] > 60)
+    ring_area = np.count_nonzero(ring)
+    if np.count_nonzero(colored_ring) < 20 or np.count_nonzero(colored_ring) / ring_area < 0.35:
         return None, 0.0, ("blue", "purple")
+    pixels = hsv[colored_ring]
 
     hue = float(np.median(pixels[:, 0]))
     candidates = sorted(
@@ -227,6 +242,16 @@ def _surrounding_color(
 def _hue_distance(first: float, second: float) -> float:
     distance = abs(first - second)
     return min(distance, 180 - distance)
+
+
+def _local_contrast_mask(image: np.ndarray) -> np.ndarray:
+    """Find bright compact features relative to their immediate surroundings."""
+
+    luminance = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)[:, :, 0]
+    background = cv2.GaussianBlur(luminance, (0, 0), 9)
+    contrast = cv2.subtract(luminance, background)
+    _, mask = cv2.threshold(contrast, 18, 255, cv2.THRESH_BINARY)
+    return mask
 
 
 def _read_image(path: Path) -> np.ndarray:
