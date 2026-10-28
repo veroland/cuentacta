@@ -14,6 +14,7 @@ Work in progress: an Android app that automatically counts visible TACTA points 
 - [Product requirements](docs/PRD.md)
 - [Technical plan](docs/TECHNICAL_PLAN.md)
 - [Visual reference collection](docs/DATA_COLLECTION.md)
+- [Visible point-dot detection rules](docs/DOT_DETECTION_RULES.md)
 - [Roadmap](docs/ROADMAP.md)
 
 Third-party visual references and game materials are intentionally excluded from version control.
