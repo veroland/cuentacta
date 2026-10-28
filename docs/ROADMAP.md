@@ -16,7 +16,7 @@ The next milestone is evidence that the visual analysis can count TACTA scores r
 
 ## Immediate next action
 
-Calibrate visible-point detection against the recorded totals in `partida1.jpg` and `partida2.jpg`. Do not return a score until every detected marker has a confident card-color assignment.
+Calibrate visible-point-dot detection against the recorded totals in `partida1.jpg` and `partida2.jpg`. Do not return a score until every detected point dot has a confident card-color assignment.
 
 ## Definition of a usable proof of concept
 

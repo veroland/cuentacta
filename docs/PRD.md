@@ -10,7 +10,7 @@ An Android app that calculates each TACTA player's visible points from one board
 
 ## Problem
 
-TACTA scores are the visible circular point markers on cards of each player's color. A card's printed number indicates its maximum points, but covered markers do not score. End-of-game boards can be crowded, rotated, partially covered, and photographed under uneven lighting, so manual counting is slow and error-prone.
+TACTA scores are the visible white point dots on cards of each player's color. Each dot is worth one point; covered dots do not score. The number in a circle, square, or triangle identifies the card's value and is not itself a point. End-of-game boards can be crowded, rotated, partially covered, and photographed under uneven lighting, so manual counting is slow and error-prone.
 
 ## Product scope
 
@@ -37,8 +37,8 @@ TACTA scores are the visible circular point markers on cards of each player's co
 
 - A result contains every selected player exactly once.
 - A result never includes an unselected color.
-- Each visible circular point marker contributes one point to its card color.
-- A point marker hidden by an overlapping card does not contribute to the total.
+- Each visible white point dot contributes one point to its card color.
+- A point dot hidden by an overlapping card does not contribute to the total.
 - The app does not offer manual score correction in the first release.
 - A low-confidence image results in a retake request, not a guessed score.
 - Session data disappears when the user leaves or starts a new game.

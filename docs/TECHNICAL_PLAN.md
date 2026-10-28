@@ -8,7 +8,7 @@ Build an Android client and a Python image-analysis service. Start with a measur
 | --- | --- | --- |
 | Android app | Temporary game setup, camera capture, result display, retake guidance | Kotlin, Jetpack Compose, CameraX |
 | API | Receives an image plus the selected TACTA colors and returns typed scores | Python, FastAPI |
-| Analysis pipeline | Finds visible point markers, identifies their card color, detects uncertainty, totals scores | Python, OpenCV plus a TACTA-specific recognizer |
+| Analysis pipeline | Finds visible point dots, identifies their card color, detects uncertainty, totals scores | Python, OpenCV plus a TACTA-specific recognizer |
 | Deployment | Hosts the API for Android clients | To be selected after the proof of concept |
 
 ## Analysis contract
@@ -40,7 +40,7 @@ or a retake response:
 ```json
 {
   "status": "retake_required",
-  "reason": "Cards or value marks are not visible enough to score reliably."
+  "reason": "Cards or point dots are not visible enough to score reliably."
 }
 ```
 
@@ -61,7 +61,7 @@ or a retake response:
 - Return either a complete score object or `retake_required`.
 - Measure results only against scenes with known expected totals.
 
-Current baseline: the local Python harness detects visible circular point markers and assigns each one to its surrounding card color. It returns `retake_required` until every detected marker has a confident color assignment, and it must be calibrated against the recorded board totals.
+Current baseline: the local Python harness must detect every visible white point dot and assign it to its surrounding card color. It returns `retake_required` until every detected point dot has a confident color assignment, and it must be calibrated against the recorded board totals. Card-value icons are not score items.
 
 ### Phase 3 — Android proof of concept
 
@@ -87,7 +87,7 @@ Current baseline: the local Python harness detects visible circular point marker
 
 | Risk | Mitigation |
 | --- | --- |
-| Cards are rotated or partially covered | Count only visible circular point markers and reject insufficiently visible regions. |
+| Cards are rotated or partially covered | Count every visible point dot and reject insufficiently visible regions. |
 | Reflections, shadows, and blur | Validate capture quality before analysis and request a retake. |
 | Few real game images | Build a card catalog, generate synthetic scenes, and label a smaller set of real scenes for evaluation. |
 | Incorrect totals | Require a labeled evaluation set before claiming reliability; prefer retake over a guessed result. |

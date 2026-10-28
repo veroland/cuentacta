@@ -33,6 +33,6 @@ This guide creates a reliable TACTA card reference set before model work begins.
 
 - [ ] Every card is fully in frame.
 - [ ] No card overlaps another card.
-- [ ] The score value and color marker are sharp enough to read when zoomed.
-- [ ] No glare covers a value mark.
+- [ ] Every visible point dot and its card color are sharp enough to read when zoomed.
+- [ ] No glare covers a visible point dot.
 - [ ] The image is taken from near directly above.

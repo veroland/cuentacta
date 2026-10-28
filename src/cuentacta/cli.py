@@ -12,6 +12,9 @@ import cv2
 from .analysis import TactaAnalyzer, _read_image
 
 
+_DEFAULT_REVIEW_COLORS = ("red", "orange", "green", "blue", "purple", "pink")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Analyze a TACTA board photograph.")
     parser.add_argument("image", type=Path)
@@ -27,6 +30,7 @@ def main() -> None:
     questions = _review_questions(result.detections)
     answers = _read_answers(args.review_answers)
     reviewed = _apply_answers(result.detections, questions, answers, args.image.stem)
+    review_complete = _has_answers_for_questions(questions, answers, args.image.stem)
     print(
         json.dumps(
             {
@@ -34,7 +38,7 @@ def main() -> None:
                 "scores": result.scores,
                 "reason": result.reason,
                 "detections": [detection.__dict__ for detection in result.detections],
-                "assisted_scores": _score_points(reviewed) if answers else None,
+                "assisted_scores": _score_points(reviewed) if review_complete else None,
             },
             indent=2,
         )
@@ -42,12 +46,18 @@ def main() -> None:
     if args.debug_output:
         _write_debug_image(image, result.detections, args.debug_output)
     if args.review_output:
-        _write_review_crops(image, questions, args.review_output, args.image.stem)
+        _write_review_crops(
+            image,
+            questions,
+            args.review_output,
+            args.image.stem,
+            selected_colors=tuple(args.colors) if args.colors else _DEFAULT_REVIEW_COLORS,
+        )
 
 
 def _write_debug_image(image, detections, output: Path) -> None:
     for detection in detections:
-        label = f"{detection.color} point ({detection.confidence:.2f})"
+        label = f"{detection.color or ' or '.join(detection.alternatives)} point ({detection.confidence:.2f})"
         cv2.circle(image, detection.center, 12, (255, 255, 255), 3)
         cv2.putText(
             image,
@@ -73,16 +83,30 @@ def _write_debug_image(image, detections, output: Path) -> None:
     cv2.imwrite(str(output), image)
 
 
-def _write_review_crops(image, questions, output: Path, image_stem: str) -> None:
+def _write_review_crops(
+    image,
+    questions,
+    output: Path,
+    image_stem: str,
+    selected_colors: tuple[str, ...] = _DEFAULT_REVIEW_COLORS,
+) -> None:
     """Write the most uncertain color regions as named review questions."""
 
     output.mkdir(parents=True, exist_ok=True)
+    review_questions = []
     for index, detection in enumerate(questions, start=1):
         crop = _crop_region(image, detection.center, radius=140)
+        cv2.circle(crop, (140, 140), 16, (0, 0, 0), 5)
+        cv2.circle(crop, (140, 140), 16, (255, 255, 255), 2)
         label = f"{detection.alternatives[0]} or {detection.alternatives[1]}?"
         cv2.putText(crop, label, (12, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 5, cv2.LINE_AA)
         cv2.putText(crop, label, (12, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2, cv2.LINE_AA)
-        cv2.imwrite(str(output / _question_name(image_stem, index, detection)), crop)
+        filename = _question_name(image_stem, index, detection)
+        cv2.imwrite(str(output / filename), crop)
+        review_questions.append(
+            {"filename": filename, "options": list(selected_colors), "allow_reject": True}
+        )
+    (output / "questions.json").write_text(json.dumps(review_questions, indent=2), encoding="utf-8")
 
 
 def _crop_region(image, center: tuple[int, int], radius: int):
@@ -96,13 +120,20 @@ def _review_questions(detections):
     return sorted(
         (detection for detection in detections if detection.confidence < 0.85),
         key=lambda detection: detection.confidence,
-    )[:6]
+    )
 
 
 def _read_answers(path: Path | None) -> dict[str, str]:
     if path is None:
         return {}
-    return json.loads(path.read_text(encoding="utf-8"))
+    return json.loads(path.read_text(encoding="utf-8-sig"))
+
+
+def _has_answers_for_questions(questions, answers: dict[str, str], image_stem: str) -> bool:
+    return bool(answers) and all(
+        _question_name(image_stem, index, question) in answers
+        for index, question in enumerate(questions, start=1)
+    )
 
 
 def _apply_answers(detections, questions, answers: dict[str, str], image_stem: str):
@@ -115,6 +146,8 @@ def _apply_answers(detections, questions, answers: dict[str, str], image_stem: s
     for detection in detections:
         answer = answers_by_center.get(detection.center)
         if answer == "reject":
+            continue
+        if detection.color is None and answer is None:
             continue
         reviewed.append(replace(detection, color=answer) if answer else detection)
     return reviewed

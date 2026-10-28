@@ -1,4 +1,4 @@
-"""Detect and count visible TACTA point markers from a board photograph."""
+"""Detect and count visible TACTA point dots from a board photograph."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ _MINIMUM_POINT_CONFIDENCE = 0.85
 
 @dataclass(frozen=True)
 class PointDetection:
-    color: ColorName
+    color: ColorName | None
     confidence: float
     center: tuple[int, int]
     alternatives: tuple[ColorName, ColorName]
@@ -39,7 +39,7 @@ class AnalysisResult:
 
 
 class TactaAnalyzer:
-    """Count the circular point markers that remain visible on colored cards."""
+    """Count the visible white point dots that remain visible on colored cards."""
 
     def analyze_path(
         self,
@@ -61,19 +61,21 @@ class TactaAnalyzer:
 
         detections = tuple(find_visible_points(image))
         if selected is not None:
-            detections = tuple(point for point in detections if point.color in selected)
+            detections = tuple(
+                point for point in detections if point.color is None or point.color in selected
+            )
         if not detections:
             return AnalysisResult(
                 status="retake_required",
                 scores=None,
-                reason="No TACTA point markers were visible enough to score.",
+                reason="No TACTA point dots were visible enough to score.",
                 detections=detections,
             )
         if any(point.confidence < _MINIMUM_POINT_CONFIDENCE for point in detections):
             return AnalysisResult(
                 status="retake_required",
                 scores=None,
-                reason="Some visible point markers could not be assigned to a card color confidently.",
+                reason="Some visible point dots could not be assigned to a card color confidently.",
                 detections=detections,
             )
 
@@ -84,47 +86,49 @@ class TactaAnalyzer:
 
 
 def find_visible_points(image: np.ndarray) -> list[PointDetection]:
-    """Find circular, light markers and assign them to their colored card.
+    """Find circular, light point dots and assign them to their colored card.
 
-    A marker is light and almost unsaturated; the colored ring immediately
-    around it determines its owner. This makes the detector independent from
-    the printed number, which may describe points hidden by an overlap.
+    A point dot is light and almost unsaturated; the colored region immediately
+    around it determines its owner. Card-value icons are larger and must not
+    be counted as points.
     """
 
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     enhanced_luminance = _enhance_luminance(image)
     _, bright_pixels = cv2.threshold(enhanced_luminance, 170, 255, cv2.THRESH_BINARY)
     low_saturation = cv2.inRange(hsv, (0, 0, 0), (179, 110, 255))
-    enhanced_markers = cv2.bitwise_and(bright_pixels, low_saturation)
-    original_markers = cv2.inRange(hsv, (0, 0, 150), (179, 110, 255))
+    enhanced_dots = cv2.bitwise_and(bright_pixels, low_saturation)
+    original_dots = cv2.inRange(hsv, (0, 0, 150), (179, 110, 255))
 
-    points = _find_points_in_mask(original_markers, hsv)
-    points.extend(_find_points_in_mask(enhanced_markers, hsv))
+    points = _find_points_in_mask(original_dots, hsv)
+    points.extend(_find_points_in_mask(enhanced_dots, hsv))
     return _deduplicate_points(points)
 
 
 def _find_points_in_mask(mask: np.ndarray, hsv: np.ndarray) -> list[PointDetection]:
     labels, statistics, centers = _connected_components(mask)
-    minimum_side = round(min(hsv.shape[:2]) * 0.008)
-    maximum_side = round(min(hsv.shape[:2]) * 0.024)
+    minimum_side = max(3, round(min(hsv.shape[:2]) * 0.004))
+    maximum_side = max(8, round(min(hsv.shape[:2]) * 0.02))
 
     points: list[PointDetection] = []
     for label, (x, y, width, height, area) in enumerate(statistics[1:], start=1):
         if not (
-            150 <= area <= 2_000
+            15 <= area <= 500
             and minimum_side <= width <= maximum_side
             and minimum_side <= height <= maximum_side
         ):
             continue
+        if area / (width * height) < 0.55:
+            continue
         circularity = _circularity(labels, label, x, y, width, height)
-        if circularity < 0.82:
+        if circularity < 0.75:
+            continue
+        if _component_has_hole(labels, label, x, y, width, height):
             continue
         center = tuple(int(round(value)) for value in centers[label])
         color, color_confidence, alternatives = _surrounding_color(
             hsv, center, max(width, height)
         )
-        if color is None:
-            continue
         confidence = min(1.0, circularity * color_confidence)
         points.append(
             PointDetection(
@@ -179,6 +183,19 @@ def _circularity(
     if perimeter == 0:
         return 0.0
     return float(4 * np.pi * cv2.contourArea(contour) / (perimeter * perimeter))
+
+
+def _component_has_hole(
+    labels: np.ndarray,
+    label: int,
+    x: int,
+    y: int,
+    width: int,
+    height: int,
+) -> bool:
+    component = np.uint8(labels[y : y + height, x : x + width] == label) * 255
+    _, hierarchy = cv2.findContours(component, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    return hierarchy is not None and any(parent >= 0 for _, _, _, parent in hierarchy[0])
 
 
 def _surrounding_color(
