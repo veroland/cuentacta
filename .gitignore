@@ -1,6 +1,13 @@
 # Local reference material; do not publish third-party images or rule files.
 /ejemplos/
 /referencias/
+/.venv/
+/artifacts/
+
+# Python build and bytecode artifacts.
+__pycache__/
+*.py[cod]
+*.egg-info/
 
 # Local orchestration state.
 /.atl/

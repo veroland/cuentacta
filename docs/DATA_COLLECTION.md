@@ -2,15 +2,14 @@
 
 This guide creates a reliable TACTA card reference set before model work begins.
 
-## Next capture: blue deck
+## Captured reference: blue deck
 
-1. Use a plain, contrasting background and even light.
-2. Place nine blue cards in a 3x3 grid with visible gaps; do not overlap cards.
-3. Hold the camera parallel to the table and include each full card in the frame.
-4. Take a second 3x3 photograph for the remaining nine blue cards.
-5. Keep the original image resolution; do not crop, filter, or compress the images.
+1. `ejemplos/celeste1.jpg` contains nine blue cards in a non-overlapping 3x3 grid.
+2. `ejemplos/celeste2.jpg` contains the remaining nine blue cards in a non-overlapping 3x3 grid.
+3. Together, these photos cover the 18 card layouts and values 1–9 used by every color deck.
+4. The original images are retained without cropping, filtering, or compression.
 
-The same pattern will create two images for each of the six color decks: 12 images total. One side per card is enough because both card sides are visually identical.
+`ejemplos/colores.jpg` provides a color reference for each playable deck and the black starting card. Because the card layouts and values are identical across decks, additional full-deck photos are not needed for the proof of concept. One side per card is enough because both card sides are visually identical.
 
 ## Reference sets
 
@@ -18,8 +17,10 @@ The same pattern will create two images for each of the six color decks: 12 imag
 | --- | --- | --- |
 | `ejemplos/` | User-provided board, card, rule, and expected-score examples | Available |
 | `referencias/lote-01/` | 19 externally sourced images for internal visual review | Available |
-| Physical card catalog | Clean visual reference for all card colors and values | Pending |
-| Labeled board scenes | Ground truth for measuring score accuracy | Pending |
+| Physical card catalog | Card layouts, values, and deck colors | Complete for proof of concept |
+| `partida1.jpg` | Labeled board scene | Pink 12, blue 15, purple 2 |
+| `partida2.jpg` | Labeled board scene | Purple 3, orange 10, pink 12, blue 11 |
+| `partida3.jpg` | Difficult labeled board scene | Blue 53, pink 54, orange/yellow 29, green 43, red 40, purple 58 |
 
 ## Rules for reference images
 

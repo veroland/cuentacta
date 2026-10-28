@@ -8,7 +8,7 @@ Build an Android client and a Python image-analysis service. Start with a measur
 | --- | --- | --- |
 | Android app | Temporary game setup, camera capture, result display, retake guidance | Kotlin, Jetpack Compose, CameraX |
 | API | Receives an image plus the selected TACTA colors and returns typed scores | Python, FastAPI |
-| Analysis pipeline | Finds cards, identifies card color and visible value, detects uncertainty, totals scores | Python, OpenCV plus a TACTA-specific recognizer |
+| Analysis pipeline | Finds visible point markers, identifies their card color, detects uncertainty, totals scores | Python, OpenCV plus a TACTA-specific recognizer |
 | Deployment | Hosts the API for Android clients | To be selected after the proof of concept |
 
 ## Analysis contract
@@ -48,7 +48,9 @@ or a retake response:
 
 ### Phase 1 — Visual inventory
 
-- Photograph the 18 cards of each color in non-overlapping 3x3 grids.
+- Photograph the 18 cards of one reference color in two non-overlapping 3x3 grids.
+- Photograph at least one card of each playable color and the black starting card.
+- Reuse the reference-color layouts and values across decks; only the color classification varies.
 - Use one card side only: the user confirmed that both sides are visually the same.
 - Record a card catalog and the value/color features required for recognition.
 
@@ -58,6 +60,8 @@ or a retake response:
 - Establish a baseline with the supplied examples and labeled reference scenes.
 - Return either a complete score object or `retake_required`.
 - Measure results only against scenes with known expected totals.
+
+Current baseline: the local Python harness detects visible circular point markers and assigns each one to its surrounding card color. It returns `retake_required` until every detected marker has a confident color assignment, and it must be calibrated against the recorded board totals.
 
 ### Phase 3 — Android proof of concept
 
@@ -83,7 +87,7 @@ or a retake response:
 
 | Risk | Mitigation |
 | --- | --- |
-| Cards are rotated or partially covered | Use perspective-aware card detection and reject insufficiently visible values. |
+| Cards are rotated or partially covered | Count only visible circular point markers and reject insufficiently visible regions. |
 | Reflections, shadows, and blur | Validate capture quality before analysis and request a retake. |
 | Few real game images | Build a card catalog, generate synthetic scenes, and label a smaller set of real scenes for evaluation. |
 | Incorrect totals | Require a labeled evaluation set before claiming reliability; prefer retake over a guessed result. |

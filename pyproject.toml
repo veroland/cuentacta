@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cuentacta"
+version = "0.1.0"
+description = "TACTA card detection proof of concept"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0",
+    "opencv-python-headless>=4.10",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+cuentacta-analyze = "cuentacta.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

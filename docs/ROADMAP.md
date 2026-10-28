@@ -8,15 +8,15 @@ The next milestone is evidence that the visual analysis can count TACTA scores r
 | --- | --- | --- |
 | Product definition | Android-only, TACTA-only, temporary automatic scoring flow | Complete |
 | Reference review | First batch of 19 board/reference images reviewed | In progress |
-| Card catalog | Clean photos of all six color decks | Waiting for physical deck capture |
-| Scoring proof of concept | Service scores labeled boards or requests a retake | Not started |
+| Card catalog | Blue deck layouts and values plus a reference for every playable color | Complete for proof of concept |
+| Scoring proof of concept | Local detection harness returns a score or requests a retake; calibration labels pending | In progress |
 | Android proof of concept | New game, capture, result, and retake screens | Not started |
 | Reliability validation | Measured performance on labeled scenes | Not started |
 | Google Play preparation | Privacy, operational, and store-release requirements | Not started |
 
 ## Immediate next action
 
-Capture two clear 3x3 photos of the blue deck. They will establish the required sharpness and framing before collecting the remaining colors.
+Calibrate visible-point detection against the recorded totals in `partida1.jpg` and `partida2.jpg`. Do not return a score until every detected marker has a confident card-color assignment.
 
 ## Definition of a usable proof of concept
 
