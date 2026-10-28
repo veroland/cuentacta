@@ -61,9 +61,19 @@ or a retake response:
 - Return either a complete score object or `retake_required`.
 - Measure results only against scenes with known expected totals.
 
-Current baseline: the local Python harness must detect every visible white point dot and assign it to its surrounding card color. It returns `retake_required` until every detected point dot has a confident color assignment, and it must be calibrated against the recorded board totals. Card-value icons are not score items.
+Current baseline: the local Python harness must detect every visible white point dot and assign it to its surrounding card color. It must be calibrated against the recorded board totals. Card-value icons are not score items.
 
 A scoring candidate must be a solid white circle fully inside the owning card-color region. Card-value badges, color-accessibility symbols, borders, and card intersections must be rejected even when they contain white pixels.
+
+### Assisted point review
+
+When uncertainty is bounded, the client displays the photograph with detected
+points overlaid. The user may tap a visible missing dot and assign one of the
+selected player colors, or tap a false detection and reject it. Review stores
+point-level evidence only; it never accepts a manually entered total.
+
+When uncertainty is too broad to review efficiently, such as a dense large
+board, the client returns `retake_required` instead.
 
 ### Phase 3 — Android proof of concept
 
@@ -81,6 +91,7 @@ A scoring candidate must be a solid white circle fully inside the owning card-co
 
 - Treat a score as valid only when every selected color has a confident result.
 - Do not silently convert low confidence into zero points.
+- Permit only point-level add or reject actions during review; never accept a direct total override.
 - Delete uploaded board images after analysis unless an explicit future retention policy is approved.
 - Keep API responses typed and deterministic; the app must never parse free-form prose as scores.
 - Keep the recognition scope fixed to TACTA; do not generalize to other games without a new product decision.

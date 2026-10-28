@@ -20,8 +20,8 @@ TACTA scores are the visible white point dots on cards of each player's color. E
 | Platform | Android first; Google Play is a future release path after reliable validation. |
 | Session | Temporary: no account, game history, or saved score history. |
 | Players | User selects player count, assigns colors, and may enter names. |
-| Result | Automatic total per selected color. No manual score editing. |
-| Low confidence | The app asks for a new photograph instead of inventing a score. |
+| Result | Automatic total per selected color, with point-by-point review when needed. No direct total editing. |
+| Low confidence | The app offers point review when bounded; otherwise it asks for a new photograph instead of inventing a score. |
 | Processing | A board photo may be sent to a server for analysis. |
 
 ## User flow
@@ -30,8 +30,9 @@ TACTA scores are the visible white point dots on cards of each player's color. E
 2. The user chooses the number of players, then assigns a TACTA color to each player and optionally enters a name.
 3. The user takes one photograph of the final board.
 4. The app checks that the board is sufficiently visible and sends the image for analysis.
-5. The app displays one total for each participating color.
-6. If the image cannot be analyzed with sufficient confidence, the app explains why and asks the user to retake it.
+5. The app displays detected visible point dots and one total for each participating color.
+6. If bounded uncertainty remains, the user may add a visible missing dot or reject a false detection, assigning only a selected player color.
+7. If the image has too many uncertain or missing candidates, the app explains why and asks the user to retake it.
 
 ## Acceptance criteria
 
@@ -39,8 +40,9 @@ TACTA scores are the visible white point dots on cards of each player's color. E
 - A result never includes an unselected color.
 - Each visible white point dot contributes one point to its card color.
 - A point dot hidden by an overlapping card does not contribute to the total.
-- The app does not offer manual score correction in the first release.
-- A low-confidence image results in a retake request, not a guessed score.
+- A user may add or reject an individual visible point dot during low-confidence review.
+- A user cannot enter or edit a total directly.
+- A low-confidence image with too many uncertain candidates results in a retake request, not a guessed score.
 - Session data disappears when the user leaves or starts a new game.
 
 ## Out of scope

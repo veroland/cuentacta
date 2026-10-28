@@ -50,8 +50,13 @@ with the candidate circled and offer the selected player colors plus:
 
 `Not a valid point`
 
-The user confirms only candidate ownership or rejection. The user does not
-enter or edit a total manually. A rejected candidate must not be counted.
+The user may also tap a visible missing dot in the photo and assign it a
+selected player color. The user does not enter or edit a total manually. A
+rejected candidate must not be counted, and a user-added dot must retain its
+tap position and selected color as review evidence.
+
+If the number of uncertain or missing candidates is too high for practical
+review, the app must request a retake instead.
 
 ## Evidence and current limitations
 
